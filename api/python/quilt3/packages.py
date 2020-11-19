@@ -1184,7 +1184,7 @@ class Package:
 
     def _get_top_hash_parts(self):
         yield self._meta
-        # TODO: dir-level metadata should affect affect top hash as well.
+        # TODO: dir-level metadata should affect top hash as well.
         for logical_key, entry in self.walk():
             if entry.hash is None or entry.size is None:
                 raise QuiltException(
