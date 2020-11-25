@@ -24,33 +24,31 @@ export default function useEditableValue(externalValue, onCommit) {
     setState(State.mapCase({ Edited: () => v }))
   }, [])
 
-  const commit = React.useCallback(() => {
-    State.case(
-      {
-        Edited: (v) => {
-          if (!R.equals(externalValue, v)) onCommit(v)
-          cancel()
-        },
-        _: () => {},
-      },
-      state,
-    )
-  }, [externalValue, onCommit, cancel, state])
-
-  const commitValue = React.useCallback(
-    (v) => {
+  const commit = React.useCallback(
+    ({ cancel: shouldCancel = true } = {}) => {
       State.case(
         {
-          Edited: () => {
+          Edited: (v) => {
             if (!R.equals(externalValue, v)) onCommit(v)
-            cancel()
+            if (shouldCancel) cancel()
           },
           _: () => {},
         },
         state,
       )
     },
-    [externalValue, onCommit, cancel, State.Edited.is(state)],
+    [externalValue, onCommit, cancel, state],
+  )
+
+  const isEdited = State.Edited.is(state)
+  const commitValue = React.useCallback(
+    (v, { cancel: shouldCancel = true } = {}) => {
+      if (isEdited) {
+        if (!R.equals(externalValue, v)) onCommit(v)
+        if (shouldCancel) cancel()
+      }
+    },
+    [externalValue, onCommit, cancel, isEdited],
   )
 
   const value = useMemoEq([state, externalValue], () =>
