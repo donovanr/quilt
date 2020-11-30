@@ -34,6 +34,7 @@ from .telemetry import ApiTelemetry
 from .util import CACHE_PATH, DISABLE_TQDM, PACKAGE_UPDATE_POLICY
 from .util import TEMPFILE_DIR_PATH as APP_DIR_TEMPFILE_DIR
 from .util import (
+    MemoizingJSONDecoder,
     PhysicalKey,
     QuiltException,
     RemovedInQuilt4Warning,
@@ -746,7 +747,7 @@ class Package:
                     disable=DISABLE_TQDM,
                     bar_format='{l_bar}{bar}| {n}/{total} [{elapsed}<{remaining}, {rate_fmt}]',
                 ),
-                loads=json.loads,
+                loads=MemoizingJSONDecoder().decode,
             )
             meta = reader.read()
             meta.pop('top_hash', None)  # Obsolete as of PR #130

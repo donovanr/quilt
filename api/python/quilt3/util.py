@@ -1,4 +1,5 @@
 import datetime
+import functools
 import json
 import os
 import pathlib
@@ -546,3 +547,18 @@ def catalog_package_url(catalog_url, bucket, package_name, package_timestamp="la
     if tree:
         package_url = package_url + f"/tree/{package_timestamp}"
     return package_url
+
+
+class MemoizingJSONDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        @functools.lru_cache(maxsize=None)
+        def memoize_key(s):
+            return s
+
+        def object_pairs_hook(items):
+            return {
+                memoize_key(k): v
+                for k, v in items
+            }
+
+        super().__init__(*args, object_pairs_hook=object_pairs_hook, **kwargs)
